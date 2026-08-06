@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Profile — J Pepe LLC</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header>
+  <div class="nav">
+    <a class="brand" href="index.html">
+      <div class="brand-mark">J</div>
+      <div class="brand-name">pepe.<span>J PEPE LLC</span></div>
+    </a>
+    <nav class="links">
+      <a href="about.html">About</a>
+      <div class="nav-item">
+        <a href="careers.html">Careers</a>
+        <div class="nav-dropdown">
+          <a href="careers.html#call-center">Call Center Jobs</a>
+          <a href="careers.html#bookkeeping">Bookkeeping Jobs</a>
+          <a href="careers.html#sales">Sales Jobs</a>
+          <a href="careers.html#healthcare">Healthcare Support Jobs</a>
+          <a href="careers.html#interpretation">Interpretation Jobs</a>
+        </div>
+      </div>
+      <a href="join-talent-community.html">Join Our Talent Community</a>
+      <a href="blog.html">Blog</a>
+      <a href="contact.html">Contact Us</a>
+    </nav>
+    <a class="nav-cta" href="my-profile.html" style="background:var(--gold);color:var(--charcoal);">My Profile</a>
+  </div>
+</header>
+
+<section class="page-content" style="padding-top:130px;">
+  <div class="wrap">
+    <div class="profile-card">
+      <div class="profile-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+      <h2>My Profile</h2>
+      <p>Log in to check your application status, or create a profile to apply for open roles and join our Talent Community. Candidate accounts are managed securely through our hiring portal.</p>
+      <div class="profile-actions">
+        <a class="btn btn-primary" href="https://jpepellc.zohorecruit.com/candidate-portal/login" target="_blank" rel="noopener">Log in</a>
+        <a class="btn btn-ghost" href="https://jpepellc.zohorecruit.com/jobs/Careers" target="_blank" rel="noopener">Create a profile</a>
+      </div>
+      <div class="profile-note">
+        Powered by Zoho Recruit. You'll be redirected to our secure candidate portal to log in or sign up.
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap footer-grid">
+    <div class="footer-brand">
+      <div class="brand-mark">J</div>
+      J Pepe LLC — Call Center &amp; Bookkeeping Services
+    </div>
+    <nav class="footer-links">
+      <a href="about.html">About</a>
+      <a href="careers.html">Careers</a>
+      <a href="join-talent-community.html">Join Talent Community</a>
+      <a href="blog.html">Blog</a>
+      <a href="contact.html">Contact</a>
+      <a href="my-profile.html">My Profile</a>
+    </nav>
+    <div class="fine">&copy; <span id="year"></span> J Pepe LLC. All rights reserved.</div>
+  </div>
+</footer>
+
+<script>
+  document.getElementById('year').textContent = new Date().getFullYear();
+</script>
+
+</body>
+</html>

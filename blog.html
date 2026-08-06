@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Blog — J Pepe LLC</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header>
+  <div class="nav">
+    <a class="brand" href="index.html">
+      <div class="brand-mark">J</div>
+      <div class="brand-name">pepe.<span>J PEPE LLC</span></div>
+    </a>
+    <nav class="links">
+      <a href="about.html">About</a>
+      <div class="nav-item">
+        <a href="careers.html">Careers</a>
+        <div class="nav-dropdown">
+          <a href="careers.html#call-center">Call Center Jobs</a>
+          <a href="careers.html#bookkeeping">Bookkeeping Jobs</a>
+          <a href="careers.html#sales">Sales Jobs</a>
+          <a href="careers.html#healthcare">Healthcare Support Jobs</a>
+          <a href="careers.html#interpretation">Interpretation Jobs</a>
+        </div>
+      </div>
+      <a href="join-talent-community.html">Join Our Talent Community</a>
+      <a href="blog.html" style="border-bottom:2px solid var(--gold);">Blog</a>
+      <a href="contact.html">Contact Us</a>
+    </nav>
+    <a class="nav-cta" href="my-profile.html">My Profile</a>
+  </div>
+</header>
+
+<section class="page-hero">
+  <div class="bg" style="background-image:url('https://images.pexels.com/photos/4240497/pexels-photo-4240497.jpeg?auto=compress&cs=tinysrgb&h=800&fit=crop&w=1600');"></div>
+  <div class="overlay"></div>
+  <div class="wrap">
+    <div class="eyebrow"><span class="dot"></span> J Pepe LLC Blog</div>
+    <h1>Notes on remote support, bookkeeping &amp; growth.</h1>
+    <p>Practical guidance for businesses navigating call center support, bookkeeping, and building a remote-first team.</p>
+  </div>
+</section>
+
+<section class="page-content">
+  <div class="wrap">
+    <div class="blog-grid">
+
+      <div class="blog-card">
+        <img src="https://images.pexels.com/photos/8204396/pexels-photo-8204396.jpeg?auto=compress&cs=tinysrgb&h=500&fit=crop&w=800" alt="Call center agent at desk">
+        <div class="blog-body">
+          <span class="blog-date">Coming soon</span>
+          <h3>5 Signs Your Business Needs a Call Center Partner</h3>
+          <p>How to know when missed calls are costing you more than the cost of outsourcing.</p>
+        </div>
+      </div>
+
+      <div class="blog-card">
+        <img src="https://images.pexels.com/photos/16098005/pexels-photo-16098005.jpeg?auto=compress&cs=tinysrgb&h=500&fit=crop&w=800" alt="Calculator and laptop on a desk">
+        <div class="blog-body">
+          <span class="blog-date">Coming soon</span>
+          <h3>QBOA Bookkeeping 101: What "Tax-Ready Books" Actually Means</h3>
+          <p>A plain-language guide to what your bookkeeper should hand off to your CPA — and when.</p>
+        </div>
+      </div>
+
+      <div class="blog-card">
+        <img src="https://images.pexels.com/photos/7876755/pexels-photo-7876755.jpeg?auto=compress&cs=tinysrgb&h=500&fit=crop&w=800" alt="Remote team collaborating">
+        <div class="blog-body">
+          <span class="blog-date">Coming soon</span>
+          <h3>Building a Remote-First Team That Actually Works</h3>
+          <p>Lessons from running a distributed team across time zones without losing consistency.</p>
+        </div>
+      </div>
+
+    </div>
+
+    <div style="text-align:center;margin-top:44px;color:var(--charcoal-soft);font-size:14.5px;">
+      New posts coming soon. Have a topic you'd like us to cover? <a href="contact.html" style="color:var(--charcoal);text-decoration:underline;">Let us know</a>.
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap footer-grid">
+    <div class="footer-brand">
+      <div class="brand-mark">J</div>
+      J Pepe LLC — Call Center &amp; Bookkeeping Services
+    </div>
+    <nav class="footer-links">
+      <a href="about.html">About</a>
+      <a href="careers.html">Careers</a>
+      <a href="join-talent-community.html">Join Talent Community</a>
+      <a href="blog.html">Blog</a>
+      <a href="contact.html">Contact</a>
+      <a href="my-profile.html">My Profile</a>
+    </nav>
+    <div class="fine">&copy; <span id="year"></span> J Pepe LLC. All rights reserved.</div>
+  </div>
+</footer>
+
+<script>
+  document.getElementById('year').textContent = new Date().getFullYear();
+</script>
+
+</body>
+</html>
