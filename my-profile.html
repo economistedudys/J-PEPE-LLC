@@ -8,7 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-<script src="supabase-config.js"></script>
+<script src="supabaseClient-config.js"></script>
 </head>
 <body>
 
@@ -148,7 +148,7 @@
     currentUser = session.user;
     document.getElementById('userEmail').textContent = currentUser.email;
 
-    const { data: profile } = await supabase
+    const { data: profile } = await supabaseClient
       .from('candidates')
       .select('*')
       .eq('id', currentUser.id)
@@ -177,7 +177,7 @@
 
   async function loadApplications(){
     const container = document.getElementById('applicationsList');
-    const { data: apps, error } = await supabase
+    const { data: apps, error } = await supabaseClient
       .from('applications')
       .select('id, status, applied_at, jobs(title, category)')
       .eq('candidate_id', currentUser.id)
