@@ -7,6 +7,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="supabase-config.js"></script>
 </head>
 <body>
 
@@ -18,16 +20,7 @@
     </a>
     <nav class="links">
       <a href="about.html">About</a>
-      <div class="nav-item">
-        <a href="careers.html" style="border-bottom:2px solid var(--gold);">Careers</a>
-        <div class="nav-dropdown">
-          <a href="careers.html#call-center">Call Center Jobs</a>
-          <a href="careers.html#bookkeeping">Bookkeeping Jobs</a>
-          <a href="careers.html#sales">Sales Jobs</a>
-          <a href="careers.html#healthcare">Healthcare Support Jobs</a>
-          <a href="careers.html#interpretation">Interpretation Jobs</a>
-        </div>
-      </div>
+      <a href="careers.html" style="border-bottom:2px solid var(--gold);">Careers</a>
       <a href="join-talent-community.html">Join Our Talent Community</a>
       <a href="blog.html">Blog</a>
       <a href="contact.html">Contact Us</a>
@@ -42,7 +35,7 @@
   <div class="wrap">
     <div class="eyebrow"><span class="dot"></span> We're hiring, remotely, worldwide</div>
     <h1>Find your next role — from anywhere.</h1>
-    <p>Browse open positions across our five service lines. Every role is remote-friendly, and every applicant creates a profile through our candidate portal.</p>
+    <p>Browse open positions across our five service lines. Every role is remote-friendly, with a full job description and clear working conditions.</p>
   </div>
 </section>
 
@@ -50,78 +43,13 @@
   <div class="wrap">
     <div class="section-head">
       <div class="eyebrow">Open positions</div>
-      <h2>Current openings by category.</h2>
+      <h2>Current openings.</h2>
       <p>Don't see the right fit today? Join our Talent Community so we can reach out when a matching role opens up.</p>
     </div>
 
-    <h3 id="call-center" style="font-family:'Poppins',sans-serif;font-size:1.15rem;margin:36px 0 14px;">Call Center</h3>
-    <div class="job-list">
-      <div class="job-card">
-        <div>
-          <span class="job-cat">Call Center</span>
-          <div class="job-title">Bilingual Customer Service Representative</div>
-          <div class="job-meta"><span>Remote &middot; Worldwide</span><span>Full-time</span></div>
-        </div>
-        <a class="job-apply" href="sign-up.html">Apply now</a>
-      </div>
-      <div class="job-card">
-        <div>
-          <span class="job-cat">Call Center</span>
-          <div class="job-title">Virtual Receptionist / Appointment Setter</div>
-          <div class="job-meta"><span>Remote &middot; Worldwide</span><span>Part-time or Full-time</span></div>
-        </div>
-        <a class="job-apply" href="sign-up.html">Apply now</a>
-      </div>
+    <div id="jobsContainer" class="job-list" style="display:flex;flex-direction:column;gap:32px;">
+      <p style="color:var(--charcoal-soft);">Loading open positions...</p>
     </div>
-
-    <h3 id="bookkeeping" style="font-family:'Poppins',sans-serif;font-size:1.15rem;margin:36px 0 14px;">Bookkeeping (QBOA)</h3>
-    <div class="job-list">
-      <div class="job-card">
-        <div>
-          <span class="job-cat">Bookkeeping</span>
-          <div class="job-title">QuickBooks Online Bookkeeper</div>
-          <div class="job-meta"><span>Remote &middot; Worldwide</span><span>Full-time</span></div>
-        </div>
-        <a class="job-apply" href="sign-up.html">Apply now</a>
-      </div>
-    </div>
-
-    <h3 id="sales" style="font-family:'Poppins',sans-serif;font-size:1.15rem;margin:36px 0 14px;">Sales</h3>
-    <div class="job-list">
-      <div class="job-card">
-        <div>
-          <span class="job-cat">Sales</span>
-          <div class="job-title">Outbound Sales Representative</div>
-          <div class="job-meta"><span>Remote &middot; Worldwide</span><span>Full-time</span></div>
-        </div>
-        <a class="job-apply" href="sign-up.html">Apply now</a>
-      </div>
-    </div>
-
-    <h3 id="healthcare" style="font-family:'Poppins',sans-serif;font-size:1.15rem;margin:36px 0 14px;">Healthcare Support</h3>
-    <div class="job-list">
-      <div class="job-card">
-        <div>
-          <span class="job-cat">Healthcare</span>
-          <div class="job-title">Medical Answering &amp; Scheduling Agent</div>
-          <div class="job-meta"><span>Remote &middot; Worldwide</span><span>Full-time</span></div>
-        </div>
-        <a class="job-apply" href="sign-up.html">Apply now</a>
-      </div>
-    </div>
-
-    <h3 id="interpretation" style="font-family:'Poppins',sans-serif;font-size:1.15rem;margin:36px 0 14px;">Interpretation</h3>
-    <div class="job-list">
-      <div class="job-card">
-        <div>
-          <span class="job-cat">Interpretation</span>
-          <div class="job-title">Bilingual Interpreter (Spanish/English)</div>
-          <div class="job-meta"><span>Remote &middot; Worldwide</span><span>Full-time or Part-time</span></div>
-        </div>
-        <a class="job-apply" href="sign-up.html">Apply now</a>
-      </div>
-    </div>
-
   </div>
 </section>
 
@@ -153,6 +81,60 @@
 
 <script>
   document.getElementById('year').textContent = new Date().getFullYear();
+  const supabase = getSupabaseClient();
+
+  function escapeHtml(str){
+    if (!str) return '';
+    return str.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  }
+
+  async function loadJobs(){
+    const container = document.getElementById('jobsContainer');
+    const { data: jobs, error } = await supabase
+      .from('jobs')
+      .select('*')
+      .eq('is_active', true)
+      .order('category', { ascending: true })
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      container.innerHTML = '<p style="color:var(--charcoal-soft);">Unable to load positions right now. Please check back shortly.</p>';
+      return;
+    }
+
+    if (!jobs || jobs.length === 0) {
+      container.innerHTML = '<p style="color:var(--charcoal-soft);">No open positions right now — check back soon, or join our Talent Community below.</p>';
+      return;
+    }
+
+    const grouped = {};
+    jobs.forEach(job => {
+      if (!grouped[job.category]) grouped[job.category] = [];
+      grouped[job.category].push(job);
+    });
+
+    let html = '';
+    Object.keys(grouped).forEach(category => {
+      html += `<div><h3 style="font-family:'Poppins',sans-serif;font-size:1.1rem;margin-bottom:14px;">${escapeHtml(category)}</h3>`;
+      grouped[category].forEach(job => {
+        html += `
+          <div class="job-card">
+            <div>
+              <span class="job-cat">${escapeHtml(job.category)}</span>
+              <div class="job-title">${escapeHtml(job.title)}</div>
+              <div class="job-meta"><span>${escapeHtml(job.location)}</span><span>${escapeHtml(job.employment_type)}</span></div>
+              ${job.summary ? `<p style="margin-top:8px;color:var(--charcoal-soft);font-size:13.5px;max-width:520px;">${escapeHtml(job.summary)}</p>` : ''}
+            </div>
+            <a class="job-apply" href="job.html?id=${job.id}">View &amp; Apply</a>
+          </div>`;
+      });
+      html += '</div>';
+    });
+
+    container.innerHTML = html;
+  }
+
+  loadJobs();
 </script>
 
 </body>

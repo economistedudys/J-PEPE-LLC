@@ -52,9 +52,19 @@
       <button type="submit" class="btn btn-primary form-submit" id="submitBtn">Create profile</button>
     </form>
 
-    <div class="form-alt">Already have a profile? <a href="login.html">Log in</a></div>
+    <div class="form-alt">Already have a profile? <a href="login.html" id="loginLink">Log in</a></div>
   </div>
 </section>
+
+<script>
+  (function(){
+    const params = new URLSearchParams(window.location.search);
+    const redirect = params.get('redirect');
+    if (redirect) {
+      document.getElementById('loginLink').href = 'login.html?redirect=' + encodeURIComponent(redirect);
+    }
+  })();
+</script>
 
 <footer>
   <div class="wrap footer-grid">
@@ -117,7 +127,7 @@
     }
 
     if (data.session) {
-      window.location.href = 'my-profile.html';
+      window.location.href = getRedirectTarget();
     } else {
       showAlert('Account created! Check your email to confirm your address, then log in.', 'success');
       submitBtn.disabled = false;
@@ -125,6 +135,12 @@
       document.getElementById('signupForm').reset();
     }
   });
+
+  function getRedirectTarget(){
+    const params = new URLSearchParams(window.location.search);
+    const redirect = params.get('redirect');
+    return redirect ? redirect : 'my-profile.html';
+  }
 </script>
 
 </body>

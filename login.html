@@ -48,9 +48,19 @@
       <button type="submit" class="btn btn-primary form-submit" id="submitBtn">Log in</button>
     </form>
 
-    <div class="form-alt">Don't have a profile yet? <a href="sign-up.html">Create one</a></div>
+    <div class="form-alt">Don't have a profile yet? <a href="sign-up.html" id="signupLink">Create one</a></div>
   </div>
 </section>
+
+<script>
+  (function(){
+    const params = new URLSearchParams(window.location.search);
+    const redirect = params.get('redirect');
+    if (redirect) {
+      document.getElementById('signupLink').href = 'sign-up.html?redirect=' + encodeURIComponent(redirect);
+    }
+  })();
+</script>
 
 <footer>
   <div class="wrap footer-grid">
@@ -98,8 +108,14 @@
       return;
     }
 
-    window.location.href = 'my-profile.html';
+    window.location.href = getRedirectTarget();
   });
+
+  function getRedirectTarget(){
+    const params = new URLSearchParams(window.location.search);
+    const redirect = params.get('redirect');
+    return redirect ? redirect : 'my-profile.html';
+  }
 </script>
 
 </body>
