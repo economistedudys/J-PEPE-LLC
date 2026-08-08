@@ -8,7 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-<script src="supabase-config.js"></script>
+<script src="supabaseClient-config.js"></script>
 </head>
 <body>
 
@@ -84,7 +84,7 @@
       return;
     }
 
-    const { data: apps, error } = await supabase
+    const { data: apps, error } = await supabaseClient
       .from('applications')
       .select('id, status, applied_at, cover_note, jobs(id, title, category), candidates(id, full_name, email, phone, photo_url, resume_url, experience, education, cover_letter)')
       .order('applied_at', { ascending: false });
