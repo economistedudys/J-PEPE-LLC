@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Job Details — J Pepe LLC</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="supabase-config.js"></script>
+</head>
+<body>
+
+<header>
+  <div class="nav">
+    <a class="brand" href="index.html">
+      <div class="brand-mark">J</div>
+      <div class="brand-name">pepe.<span>J PEPE LLC</span></div>
+    </a>
+    <nav class="links">
+      <a href="about.html">About</a>
+      <a href="careers.html">Careers</a>
+      <a href="join-talent-community.html">Join Our Talent Community</a>
+      <a href="blog.html">Blog</a>
+      <a href="contact.html">Contact Us</a>
+    </nav>
+    <a class="nav-cta" href="my-profile.html">My Profile</a>
+  </div>
+</header>
+
+<section class="job-detail-hero">
+  <div class="wrap">
+    <span class="job-cat tag" id="jobCategory"></span>
+    <h1 id="jobTitle">Loading position...</h1>
+    <div class="job-detail-meta">
+      <span id="jobLocation"></span>
+      <span id="jobType"></span>
+      <span id="jobSchedule"></span>
+    </div>
+  </div>
+</section>
+
+<section class="wrap job-detail-body" id="jobBody" style="display:none;">
+  <div>
+    <div class="job-section">
+      <h3>About this role</h3>
+      <p id="jobDescription"></p>
+    </div>
+    <div class="job-section">
+      <h3>Responsibilities</h3>
+      <ul class="job-list" id="jobResponsibilities"></ul>
+    </div>
+    <div class="job-section">
+      <h3>What we're looking for</h3>
+      <ul class="job-list" id="jobRequirements"></ul>
+    </div>
+    <div class="job-section">
+      <h3>Working conditions</h3>
+      <ul class="job-list" id="jobConditions"></ul>
+    </div>
+  </div>
+
+  <div class="job-apply-card">
+    <h4>Apply for this role</h4>
+    <div id="alertBox" class="alert-box"></div>
+    <div id="applyLoggedOut">
+      <p style="font-size:13.5px;color:var(--charcoal-soft);margin-bottom:16px;">Log in or create a candidate profile to apply — it only takes a minute, and you can reuse it for future roles.</p>
+      <a class="btn btn-primary" id="loginRedirect" href="login.html">Log in to apply</a>
+      <a class="btn btn-ghost" id="signupRedirect" href="sign-up.html" style="width:100%;justify-content:center;margin-top:10px;">Create a profile</a>
+    </div>
+    <div id="applyLoggedIn" style="display:none;">
+      <div class="form-group">
+        <label for="coverNote">A short note for this role (optional)</label>
+        <textarea id="coverNote" placeholder="Why you're a great fit for this specific role..."></textarea>
+      </div>
+      <button class="btn btn-primary" id="applyBtn" style="width:100%;justify-content:center;">Submit application</button>
+      <div id="alreadyApplied" style="display:none;font-size:13.5px;color:var(--charcoal-soft);margin-top:12px;">
+        You've already applied to this role. <a href="my-profile.html">View your applications</a>.
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap footer-grid">
+    <div class="footer-brand">
+      <div class="brand-mark">J</div>
+      J Pepe LLC — Call Center &amp; Bookkeeping Services
+    </div>
+    <nav class="footer-links">
+      <a href="about.html">About</a>
+      <a href="careers.html">Careers</a>
+      <a href="join-talent-community.html">Join Talent Community</a>
+      <a href="blog.html">Blog</a>
+      <a href="contact.html">Contact</a>
+      <a href="my-profile.html">My Profile</a>
+    </nav>
+    <div class="fine">&copy; <span id="year"></span> J Pepe LLC. All rights reserved.</div>
+  </div>
+</footer>
+
+<script>
+  document.getElementById('year').textContent = new Date().getFullYear();
+  const supabaseClient = getSupabaseClient();
+
+  function escapeHtml(str){
+    if (!str) return '';
+    return str.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  }
+  function toListItems(text){
+    if (!text) return '';
+    return text.split('\n').filter(l => l.trim()).map(line =>
+      `<li><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>${escapeHtml(line.trim())}</li>`
+    ).join('');
+  }
+
+  const params = new URLSearchParams(window.location.search);
+  const jobId = params.get('id');
+  let currentJob = null;
+  let currentUser = null;
+
+  function showAlert(message, type){
+    const box = document.getElementById('alertBox');
+    box.textContent = message;
+    box.className = 'alert-box show ' + (type === 'error' ? 'alert-error' : 'alert-success');
+  }
+
+  async function loadJob(){
+    if (!jobId) {
+      document.getElementById('jobTitle').textContent = 'Position not found';
+      return;
+    }
+    const { data: job, error } = await supabaseClient.from('jobs').select('*').eq('id', jobId).maybeSingle();
+    if (error || !job) {
+      document.getElementById('jobTitle').textContent = 'Position not found';
+      return;
+    }
+    currentJob = job;
+    document.title = job.title + ' — J Pepe LLC';
+    document.getElementById('jobCategory').textContent = job.category;
+    document.getElementById('jobTitle').textContent = job.title;
+    document.getElementById('jobLocation').textContent = job.location || 'Remote';
+    document.getElementById('jobType').textContent = job.employment_type || 'Full-time';
+    document.getElementById('jobSchedule').textContent = job.schedule || '';
+    document.getElementById('jobDescription').textContent = job.description || '';
+    document.getElementById('jobResponsibilities').innerHTML = toListItems(job.responsibilities);
+    document.getElementById('jobRequirements').innerHTML = toListItems(job.requirements);
+    document.getElementById('jobConditions').innerHTML = toListItems(job.working_conditions);
+    document.getElementById('jobBody').style.display = 'grid';
+  }
+
+  async function checkAuthAndApplication(){
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (!session) {
+      document.getElementById('loginRedirect').href = 'login.html?redirect=job.html?id=' + jobId;
+      document.getElementById('signupRedirect').href = 'sign-up.html?redirect=job.html?id=' + jobId;
+      return;
+    }
+    currentUser = session.user;
+    document.getElementById('applyLoggedOut').style.display = 'none';
+    document.getElementById('applyLoggedIn').style.display = 'block';
+
+    const { data: existing } = await supabaseClient
+      .from('applications')
+      .select('id')
+      .eq('candidate_id', currentUser.id)
+      .eq('job_id', jobId)
+      .maybeSingle();
+
+    if (existing) {
+      document.getElementById('applyBtn').style.display = 'none';
+      document.getElementById('coverNote').style.display = 'none';
+      document.getElementById('alreadyApplied').style.display = 'block';
+    }
+  }
+
+  document.getElementById('applyBtn').addEventListener('click', async function(){
+    const btn = this;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>Submitting...';
+
+    const { error } = await supabaseClient.from('applications').insert({
+      candidate_id: currentUser.id,
+      job_id: jobId,
+      cover_note: document.getElementById('coverNote').value.trim()
+    });
+
+    btn.disabled = false;
+    btn.textContent = 'Submit application';
+
+    if (error) {
+      showAlert(error.message, 'error');
+    } else {
+      showAlert('Application submitted! We\'ll be in touch.', 'success');
+      btn.style.display = 'none';
+      document.getElementById('coverNote').style.display = 'none';
+    }
+  });
+
+  (async function(){
+    await loadJob();
+    await checkAuthAndApplication();
+  })();
+</script>
+
+</body>
+</html>
