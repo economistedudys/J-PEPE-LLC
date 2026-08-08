@@ -7,6 +7,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="supabase-config.js"></script>
 </head>
 <body>
 
@@ -18,16 +20,7 @@
     </a>
     <nav class="links">
       <a href="about.html">About</a>
-      <div class="nav-item">
-        <a href="careers.html">Careers</a>
-        <div class="nav-dropdown">
-          <a href="careers.html#call-center">Call Center Jobs</a>
-          <a href="careers.html#bookkeeping">Bookkeeping Jobs</a>
-          <a href="careers.html#sales">Sales Jobs</a>
-          <a href="careers.html#healthcare">Healthcare Support Jobs</a>
-          <a href="careers.html#interpretation">Interpretation Jobs</a>
-        </div>
-      </div>
+      <a href="careers.html">Careers</a>
       <a href="join-talent-community.html">Join Our Talent Community</a>
       <a href="blog.html">Blog</a>
       <a href="contact.html">Contact Us</a>
@@ -36,20 +29,53 @@
   </div>
 </header>
 
-<section class="page-content" style="padding-top:130px;">
-  <div class="wrap">
-    <div class="profile-card">
-      <div class="profile-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
-      <h2>My Profile</h2>
-      <p>Log in to check your application status, or create a profile to apply for open roles and join our Talent Community. Candidate accounts are managed securely through our hiring portal.</p>
-      <div class="profile-actions">
-        <a class="btn btn-primary" href="https://jpepellc.zohorecruit.com/candidate-portal/login" target="_blank" rel="noopener">Log in</a>
-        <a class="btn btn-ghost" href="https://jpepellc.zohorecruit.com/jobs/Careers" target="_blank" rel="noopener">Create a profile</a>
+<section class="auth-wrap" style="max-width:640px;">
+  <div class="form-card">
+
+    <div class="profile-header">
+      <div>
+        <h1 style="margin-bottom:2px;">My Profile</h1>
+        <span class="user-email" id="userEmail"></span>
       </div>
-      <div class="profile-note">
-        Powered by Zoho Recruit. You'll be redirected to our secure candidate portal to log in or sign up.
-      </div>
+      <button class="logout-link" id="logoutBtn">Log out</button>
     </div>
+
+    <div id="alertBox" class="alert-box"></div>
+
+    <form id="profileForm">
+      <div class="form-group">
+        <label for="fullName">Full name</label>
+        <input type="text" id="fullName" required>
+      </div>
+      <div class="form-group">
+        <label for="phone">Phone number</label>
+        <input type="tel" id="phone" placeholder="+1 (___) ___-____">
+      </div>
+      <div class="form-group">
+        <label for="category">Category you're interested in</label>
+        <select id="category">
+          <option value="">Select a category</option>
+          <option value="Call Center">Call Center</option>
+          <option value="Bookkeeping">Bookkeeping (QBOA)</option>
+          <option value="Sales">Sales</option>
+          <option value="Healthcare Support">Healthcare Support</option>
+          <option value="Interpretation">Interpretation</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="coverNote">Tell us a bit about yourself</label>
+        <textarea id="coverNote" placeholder="Experience, availability, languages spoken..."></textarea>
+      </div>
+      <div class="form-group">
+        <label for="resumeFile">Resume / CV (PDF or Word)</label>
+        <div class="file-drop" id="fileDropLabel">Click to choose a file, or drag it here</div>
+        <input type="file" id="resumeFile" accept=".pdf,.doc,.docx" style="display:none;">
+        <div class="resume-current" id="resumeCurrent"></div>
+      </div>
+      <button type="submit" class="btn btn-primary form-submit" id="submitBtn">Save profile</button>
+    </form>
+
   </div>
 </section>
 
@@ -73,6 +99,113 @@
 
 <script>
   document.getElementById('year').textContent = new Date().getFullYear();
+  const supabase = getSupabaseClient();
+  const alertBox = document.getElementById('alertBox');
+  const submitBtn = document.getElementById('submitBtn');
+  let currentUser = null;
+  let selectedFile = null;
+
+  function showAlert(message, type){
+    alertBox.textContent = message;
+    alertBox.className = 'alert-box show ' + (type === 'error' ? 'alert-error' : 'alert-success');
+  }
+
+  async function init(){
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      window.location.href = 'login.html';
+      return;
+    }
+    currentUser = session.user;
+    document.getElementById('userEmail').textContent = currentUser.email;
+
+    const { data: profile } = await supabase
+      .from('candidates')
+      .select('*')
+      .eq('id', currentUser.id)
+      .maybeSingle();
+
+    if (profile) {
+      document.getElementById('fullName').value = profile.full_name || '';
+      document.getElementById('phone').value = profile.phone || '';
+      document.getElementById('category').value = profile.category || '';
+      document.getElementById('coverNote').value = profile.cover_note || '';
+      if (profile.resume_url) {
+        document.getElementById('resumeCurrent').innerHTML =
+          'Current file: <a href="' + profile.resume_url + '" target="_blank" rel="noopener">view uploaded resume</a>';
+      }
+    } else {
+      document.getElementById('fullName').value = currentUser.user_metadata?.full_name || '';
+    }
+  }
+
+  document.getElementById('fileDropLabel').addEventListener('click', function(){
+    document.getElementById('resumeFile').click();
+  });
+  document.getElementById('resumeFile').addEventListener('change', function(e){
+    selectedFile = e.target.files[0];
+    if (selectedFile) {
+      document.getElementById('fileDropLabel').textContent = selectedFile.name;
+    }
+  });
+
+  document.getElementById('logoutBtn').addEventListener('click', async function(){
+    await supabase.auth.signOut();
+    window.location.href = 'index.html';
+  });
+
+  document.getElementById('profileForm').addEventListener('submit', async function(e){
+    e.preventDefault();
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="spinner"></span>Saving...';
+
+    let resumeUrl = null;
+
+    if (selectedFile) {
+      const filePath = currentUser.id + '/' + Date.now() + '_' + selectedFile.name;
+      const { error: uploadError } = await supabase.storage
+        .from('resumes')
+        .upload(filePath, selectedFile, { upsert: true });
+
+      if (uploadError) {
+        showAlert('Resume upload failed: ' + uploadError.message, 'error');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Save profile';
+        return;
+      }
+
+      const { data: urlData } = supabase.storage.from('resumes').getPublicUrl(filePath);
+      resumeUrl = urlData.publicUrl;
+    }
+
+    const updatePayload = {
+      id: currentUser.id,
+      full_name: document.getElementById('fullName').value.trim(),
+      email: currentUser.email,
+      phone: document.getElementById('phone').value.trim(),
+      category: document.getElementById('category').value,
+      cover_note: document.getElementById('coverNote').value.trim(),
+      updated_at: new Date().toISOString()
+    };
+    if (resumeUrl) updatePayload.resume_url = resumeUrl;
+
+    const { error } = await supabase.from('candidates').upsert(updatePayload);
+
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Save profile';
+
+    if (error) {
+      showAlert(error.message, 'error');
+    } else {
+      showAlert('Profile saved successfully.', 'success');
+      if (resumeUrl) {
+        document.getElementById('resumeCurrent').innerHTML =
+          'Current file: <a href="' + resumeUrl + '" target="_blank" rel="noopener">view uploaded resume</a>';
+      }
+    }
+  });
+
+  init();
 </script>
 
 </body>

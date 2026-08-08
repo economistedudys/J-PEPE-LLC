@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Create Your Profile — J Pepe LLC</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="supabase-config.js"></script>
+</head>
+<body>
+
+<header>
+  <div class="nav">
+    <a class="brand" href="index.html">
+      <div class="brand-mark">J</div>
+      <div class="brand-name">pepe.<span>J PEPE LLC</span></div>
+    </a>
+    <nav class="links">
+      <a href="about.html">About</a>
+      <a href="careers.html">Careers</a>
+      <a href="join-talent-community.html">Join Our Talent Community</a>
+      <a href="blog.html">Blog</a>
+      <a href="contact.html">Contact Us</a>
+    </nav>
+    <a class="nav-cta" href="login.html">Log in</a>
+  </div>
+</header>
+
+<section class="auth-wrap">
+  <div class="form-card">
+    <h1>Create your candidate profile</h1>
+    <p class="sub">Sign up once to apply for roles and join our Talent Community. We'll email you when a matching position opens.</p>
+
+    <div id="alertBox" class="alert-box"></div>
+
+    <form id="signupForm">
+      <div class="form-group">
+        <label for="fullName">Full name</label>
+        <input type="text" id="fullName" required>
+      </div>
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" required>
+      </div>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" minlength="6" required>
+      </div>
+      <button type="submit" class="btn btn-primary form-submit" id="submitBtn">Create profile</button>
+    </form>
+
+    <div class="form-alt">Already have a profile? <a href="login.html">Log in</a></div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap footer-grid">
+    <div class="footer-brand">
+      <div class="brand-mark">J</div>
+      J Pepe LLC — Call Center &amp; Bookkeeping Services
+    </div>
+    <nav class="footer-links">
+      <a href="about.html">About</a>
+      <a href="careers.html">Careers</a>
+      <a href="join-talent-community.html">Join Talent Community</a>
+      <a href="blog.html">Blog</a>
+      <a href="contact.html">Contact</a>
+      <a href="login.html">My Profile</a>
+    </nav>
+    <div class="fine">&copy; <span id="year"></span> J Pepe LLC. All rights reserved.</div>
+  </div>
+</footer>
+
+<script>
+  document.getElementById('year').textContent = new Date().getFullYear();
+  const supabase = getSupabaseClient();
+  const alertBox = document.getElementById('alertBox');
+  const submitBtn = document.getElementById('submitBtn');
+
+  function showAlert(message, type){
+    alertBox.textContent = message;
+    alertBox.className = 'alert-box show ' + (type === 'error' ? 'alert-error' : 'alert-success');
+  }
+
+  document.getElementById('signupForm').addEventListener('submit', async function(e){
+    e.preventDefault();
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="spinner"></span>Creating...';
+
+    const fullName = document.getElementById('fullName').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+
+    const { data, error } = await supabase.auth.signUp({
+      email: email,
+      password: password,
+      options: { data: { full_name: fullName } }
+    });
+
+    if (error) {
+      showAlert(error.message, 'error');
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Create profile';
+      return;
+    }
+
+    // Try to create the candidate row right away (works if email confirmations are off / session exists)
+    if (data.user) {
+      await supabase.from('candidates').upsert({
+        id: data.user.id,
+        full_name: fullName,
+        email: email
+      });
+    }
+
+    if (data.session) {
+      window.location.href = 'my-profile.html';
+    } else {
+      showAlert('Account created! Check your email to confirm your address, then log in.', 'success');
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Create profile';
+      document.getElementById('signupForm').reset();
+    }
+  });
+</script>
+
+</body>
+</html>
