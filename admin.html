@@ -86,7 +86,7 @@
 
     const { data: apps, error } = await supabaseClient
       .from('applications')
-      .select('id, status, applied_at, cover_note, jobs(id, title, category), candidates(id, full_name, email, phone, photo_url, resume_url, experience, education, cover_letter)')
+      .select('id, status, applied_at, cover_note, applicant_name, applicant_phone, education, experience, resume_url, voice_note_url, jobs(id, title, category), candidates(id, full_name, email, phone, photo_url, resume_url, experience, education, cover_letter)')
       .order('applied_at', { ascending: false });
 
     if (error) {
@@ -136,24 +136,31 @@
         ? `<img src="${c.photo_url}" alt="">`
         : `<svg viewBox="0 0 24 24" fill="none" stroke="var(--charcoal-soft)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="24" height="24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg>`;
 
+      const displayName = app.applicant_name || c.full_name || 'Unnamed candidate';
+      const displayPhone = app.applicant_phone || c.phone;
+      const displayEducation = app.education || c.education;
+      const displayExperience = app.experience || c.experience;
+      const displayResume = app.resume_url || c.resume_url;
+
       return `
       <div class="candidate-card">
         <div class="candidate-top">
           <div class="candidate-photo">${photo}</div>
           <div class="candidate-info">
-            <h4>${escapeHtml(c.full_name || 'Unnamed candidate')}</h4>
-            <div class="meta-line">${escapeHtml(c.email || '')} ${c.phone ? '&middot; ' + escapeHtml(c.phone) : ''}</div>
+            <h4>${escapeHtml(displayName)}</h4>
+            <div class="meta-line">${escapeHtml(c.email || '')} ${displayPhone ? '&middot; ' + escapeHtml(displayPhone) : ''}</div>
             <div class="meta-line">Applied for: <strong>${escapeHtml(app.jobs?.title || '—')}</strong></div>
           </div>
         </div>
         <div class="candidate-detail-grid">
-          <div><span class="label">Experience</span>${escapeHtml(c.experience) || '<span style="color:var(--charcoal-soft);">Not provided</span>'}</div>
-          <div><span class="label">Education</span>${escapeHtml(c.education) || '<span style="color:var(--charcoal-soft);">Not provided</span>'}</div>
+          <div><span class="label">Experience</span>${escapeHtml(displayExperience) || '<span style="color:var(--charcoal-soft);">Not provided</span>'}</div>
+          <div><span class="label">Education</span>${escapeHtml(displayEducation) || '<span style="color:var(--charcoal-soft);">Not provided</span>'}</div>
         </div>
-        ${c.cover_letter ? `<div style="margin-bottom:10px;"><span class="label" style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;text-transform:uppercase;color:var(--charcoal-soft);">Cover letter</span><p style="font-size:13.5px;">${escapeHtml(c.cover_letter)}</p></div>` : ''}
-        ${app.cover_note ? `<div style="margin-bottom:10px;"><span class="label" style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;text-transform:uppercase;color:var(--charcoal-soft);">Note for this role</span><p style="font-size:13.5px;">${escapeHtml(app.cover_note)}</p></div>` : ''}
+        ${app.cover_note ? `<div style="margin-bottom:10px;"><span class="label" style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;text-transform:uppercase;color:var(--charcoal-soft);">Why interested in this role</span><p style="font-size:13.5px;">${escapeHtml(app.cover_note)}</p></div>` : ''}
+        ${c.cover_letter ? `<div style="margin-bottom:10px;"><span class="label" style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;text-transform:uppercase;color:var(--charcoal-soft);">General cover letter</span><p style="font-size:13.5px;">${escapeHtml(c.cover_letter)}</p></div>` : ''}
+        ${app.voice_note_url ? `<div style="margin-bottom:10px;"><span class="label" style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;text-transform:uppercase;color:var(--charcoal-soft);">Voice introduction</span><audio controls src="${app.voice_note_url}" style="width:100%;margin-top:4px;"></audio></div>` : ''}
         <div class="candidate-actions">
-          ${c.resume_url ? `<a class="btn btn-ghost" style="padding:8px 16px;font-size:13px;" href="${c.resume_url}" target="_blank" rel="noopener">View resume</a>` : ''}
+          ${displayResume ? `<a class="btn btn-ghost" style="padding:8px 16px;font-size:13px;" href="${displayResume}" target="_blank" rel="noopener">View resume</a>` : ''}
           <select data-app-id="${app.id}" class="status-select">
             ${['Submitted','Under Review','Interview','Offered','Hired','Rejected'].map(s =>
               `<option value="${s}" ${app.status === s ? 'selected' : ''}>${s}</option>`

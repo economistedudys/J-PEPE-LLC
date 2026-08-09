@@ -500,3 +500,32 @@
 .candidate-detail-grid .label{font-family:'IBM Plex Mono',monospace;font-size:10.5px;text-transform:uppercase;color:var(--charcoal-soft);display:block;margin-bottom:3px;}
 .candidate-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:14px;padding-top:14px;border-top:1px solid var(--line);}
 .candidate-actions select{padding:7px 12px;border:1px solid var(--line);border-radius:8px;font-size:13px;font-family:'Inter',sans-serif;}
+
+/* ---- Full application form (job.html) ---- */
+.apply-form-full .form-group{margin-bottom:16px;}
+.apply-form-full label{display:block;font-size:13px;font-weight:600;margin-bottom:6px;}
+.apply-form-full input[type="text"],
+.apply-form-full input[type="tel"],
+.apply-form-full textarea{
+  width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;
+  font-family:'Inter',sans-serif;font-size:13.5px;
+}
+.apply-form-full textarea{min-height:80px;resize:vertical;}
+.voice-recorder{
+  border:1px solid var(--line);border-radius:10px;padding:14px;background:var(--card);
+}
+.voice-recorder .rec-controls{display:flex;align-items:center;gap:10px;}
+.rec-btn{
+  width:38px;height:38px;border-radius:50%;background:#B23A3A;border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.rec-btn svg{width:16px;height:16px;fill:#fff;}
+.rec-btn.recording{animation:pulse-rec 1.2s infinite;}
+@keyframes pulse-rec{0%,100%{opacity:1;}50%{opacity:0.55;}}
+.rec-status{font-size:12.5px;color:var(--charcoal-soft);}
+.rec-status.active{color:#B23A3A;font-weight:600;}
+.voice-recorder audio{width:100%;margin-top:10px;}
+.rec-retry{
+  font-size:12px;color:var(--charcoal-soft);text-decoration:underline;cursor:pointer;
+  background:none;border:none;padding:0;margin-top:8px;
+}

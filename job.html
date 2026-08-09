@@ -70,11 +70,47 @@
       <a class="btn btn-ghost" id="signupRedirect" href="sign-up.html" style="width:100%;justify-content:center;margin-top:10px;">Create a profile</a>
     </div>
     <div id="applyLoggedIn" style="display:none;">
-      <div class="form-group">
-        <label for="coverNote">A short note for this role (optional)</label>
-        <textarea id="coverNote" placeholder="Why you're a great fit for this specific role..."></textarea>
-      </div>
-      <button class="btn btn-primary" id="applyBtn" style="width:100%;justify-content:center;">Submit application</button>
+      <form id="applyForm" class="apply-form-full">
+        <div class="form-group">
+          <label for="applicantName">Full name</label>
+          <input type="text" id="applicantName" required>
+        </div>
+        <div class="form-group">
+          <label for="applicantPhone">Phone number</label>
+          <input type="tel" id="applicantPhone" placeholder="+1 (___) ___-____">
+        </div>
+        <div class="form-group">
+          <label for="applicantEducation">Education</label>
+          <textarea id="applicantEducation" placeholder="e.g. Associate's Degree in Business Administration..."></textarea>
+        </div>
+        <div class="form-group">
+          <label for="applicantExperience">Relevant work experience</label>
+          <textarea id="applicantExperience" placeholder="e.g. 2 years as a customer service rep..."></textarea>
+        </div>
+        <div class="form-group">
+          <label for="coverNote">Why are you interested in this role?</label>
+          <textarea id="coverNote" placeholder="Tell us what makes you a great fit for this specific position..." required></textarea>
+        </div>
+        <div class="form-group">
+          <label for="applyResumeFile">Resume / CV (PDF or Word)</label>
+          <div class="file-drop" id="applyFileDropLabel">Click to choose a file, or drag it here</div>
+          <input type="file" id="applyResumeFile" accept=".pdf,.doc,.docx" style="display:none;">
+        </div>
+        <div class="form-group">
+          <label>Voice introduction (optional, 60 sec max)</label>
+          <div class="voice-recorder">
+            <div class="rec-controls">
+              <button type="button" class="rec-btn" id="recBtn" aria-label="Record">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/></svg>
+              </button>
+              <span class="rec-status" id="recStatus">Tap to record a short intro</span>
+            </div>
+            <audio id="recPlayback" controls style="display:none;"></audio>
+            <button type="button" class="rec-retry" id="recRetry" style="display:none;">Record again</button>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary" id="applyBtn" style="width:100%;justify-content:center;margin-top:6px;">Submit application</button>
+      </form>
       <div id="alreadyApplied" style="display:none;font-size:13.5px;color:var(--charcoal-soft);margin-top:12px;">
         You've already applied to this role. <a href="my-profile.html">View your applications</a>.
       </div>
@@ -161,6 +197,23 @@
     document.getElementById('applyLoggedOut').style.display = 'none';
     document.getElementById('applyLoggedIn').style.display = 'block';
 
+    // Prefill from existing profile, if any
+    const { data: profile } = await supabaseClient
+      .from('candidates')
+      .select('full_name, phone, education, experience, resume_url')
+      .eq('id', currentUser.id)
+      .maybeSingle();
+    if (profile) {
+      if (profile.full_name) document.getElementById('applicantName').value = profile.full_name;
+      if (profile.phone) document.getElementById('applicantPhone').value = profile.phone;
+      if (profile.education) document.getElementById('applicantEducation').value = profile.education;
+      if (profile.experience) document.getElementById('applicantExperience').value = profile.experience;
+      if (profile.resume_url) {
+        existingProfileResumeUrl = profile.resume_url;
+        document.getElementById('applyFileDropLabel').textContent = 'Using resume from your profile — click to replace';
+      }
+    }
+
     const { data: existing } = await supabaseClient
       .from('applications')
       .select('id')
@@ -169,32 +222,121 @@
       .maybeSingle();
 
     if (existing) {
-      document.getElementById('applyBtn').style.display = 'none';
-      document.getElementById('coverNote').style.display = 'none';
+      document.getElementById('applyForm').style.display = 'none';
       document.getElementById('alreadyApplied').style.display = 'block';
     }
   }
 
-  document.getElementById('applyBtn').addEventListener('click', async function(){
-    const btn = this;
+  let existingProfileResumeUrl = null;
+  let selectedApplyResumeFile = null;
+  let recordedVoiceBlob = null;
+  let mediaRecorder = null;
+  let recordedChunks = [];
+  let recTimerInterval = null;
+
+  document.getElementById('applyFileDropLabel').addEventListener('click', function(){
+    document.getElementById('applyResumeFile').click();
+  });
+  document.getElementById('applyResumeFile').addEventListener('change', function(e){
+    selectedApplyResumeFile = e.target.files[0];
+    if (selectedApplyResumeFile) document.getElementById('applyFileDropLabel').textContent = selectedApplyResumeFile.name;
+  });
+
+  // Voice recording
+  const recBtn = document.getElementById('recBtn');
+  const recStatus = document.getElementById('recStatus');
+  const recPlayback = document.getElementById('recPlayback');
+  const recRetry = document.getElementById('recRetry');
+
+  recBtn.addEventListener('click', async function(){
+    if (mediaRecorder && mediaRecorder.state === 'recording') {
+      mediaRecorder.stop();
+      return;
+    }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      recordedChunks = [];
+      mediaRecorder = new MediaRecorder(stream);
+      mediaRecorder.ondataavailable = e => recordedChunks.push(e.data);
+      mediaRecorder.onstop = function(){
+        recordedVoiceBlob = new Blob(recordedChunks, { type: 'audio/webm' });
+        recPlayback.src = URL.createObjectURL(recordedVoiceBlob);
+        recPlayback.style.display = 'block';
+        recRetry.style.display = 'inline-block';
+        recBtn.style.display = 'none';
+        recStatus.textContent = 'Recording saved';
+        recStatus.className = 'rec-status';
+        clearInterval(recTimerInterval);
+        stream.getTracks().forEach(t => t.stop());
+      };
+      mediaRecorder.start();
+      recBtn.classList.add('recording');
+      recStatus.textContent = 'Recording... (tap to stop)';
+      recStatus.className = 'rec-status active';
+      let seconds = 0;
+      recTimerInterval = setInterval(() => {
+        seconds++;
+        recStatus.textContent = `Recording... ${seconds}s (tap to stop)`;
+        if (seconds >= 60) mediaRecorder.stop();
+      }, 1000);
+    } catch (err) {
+      recStatus.textContent = 'Microphone access denied or unavailable';
+    }
+  });
+
+  recRetry.addEventListener('click', function(){
+    recordedVoiceBlob = null;
+    recPlayback.style.display = 'none';
+    recRetry.style.display = 'none';
+    recBtn.style.display = 'flex';
+    recBtn.classList.remove('recording');
+    recStatus.textContent = 'Tap to record a short intro';
+  });
+
+  document.getElementById('applyForm').addEventListener('submit', async function(e){
+    e.preventDefault();
+    const btn = document.getElementById('applyBtn');
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner"></span>Submitting...';
 
-    const { error } = await supabaseClient.from('applications').insert({
-      candidate_id: currentUser.id,
-      job_id: jobId,
-      cover_note: document.getElementById('coverNote').value.trim()
-    });
+    let resumeUrl = existingProfileResumeUrl;
+    let voiceNoteUrl = null;
 
-    btn.disabled = false;
-    btn.textContent = 'Submit application';
+    try {
+      if (selectedApplyResumeFile) {
+        const path = currentUser.id + '/' + Date.now() + '_' + selectedApplyResumeFile.name;
+        const { error: upErr } = await supabaseClient.storage.from('resumes').upload(path, selectedApplyResumeFile, { upsert: true });
+        if (upErr) throw new Error('Resume upload failed: ' + upErr.message);
+        resumeUrl = supabaseClient.storage.from('resumes').getPublicUrl(path).data.publicUrl;
+      }
 
-    if (error) {
-      showAlert(error.message, 'error');
-    } else {
+      if (recordedVoiceBlob) {
+        const path = currentUser.id + '/' + Date.now() + '_intro.webm';
+        const { error: upErr } = await supabaseClient.storage.from('voice-notes').upload(path, recordedVoiceBlob, { upsert: true });
+        if (upErr) throw new Error('Voice note upload failed: ' + upErr.message);
+        voiceNoteUrl = supabaseClient.storage.from('voice-notes').getPublicUrl(path).data.publicUrl;
+      }
+
+      const { error } = await supabaseClient.from('applications').insert({
+        candidate_id: currentUser.id,
+        job_id: jobId,
+        applicant_name: document.getElementById('applicantName').value.trim(),
+        applicant_phone: document.getElementById('applicantPhone').value.trim(),
+        education: document.getElementById('applicantEducation').value.trim(),
+        experience: document.getElementById('applicantExperience').value.trim(),
+        cover_note: document.getElementById('coverNote').value.trim(),
+        resume_url: resumeUrl,
+        voice_note_url: voiceNoteUrl
+      });
+
+      if (error) throw new Error(error.message);
+
       showAlert('Application submitted! We\'ll be in touch.', 'success');
-      btn.style.display = 'none';
-      document.getElementById('coverNote').style.display = 'none';
+      document.getElementById('applyForm').style.display = 'none';
+    } catch (err) {
+      showAlert(err.message, 'error');
+      btn.disabled = false;
+      btn.textContent = 'Submit application';
     }
   });
 
