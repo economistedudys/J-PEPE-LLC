@@ -530,12 +530,16 @@
   background:none;border:none;padding:0;margin-top:8px;
 }
 
-/* ---- Social links in footer ---- */
-.social-links{display:flex;gap:14px;align-items:center;}
+/* ---- Social links in footer (light background context) ---- */
+.social-links{display:flex;gap:12px;align-items:center;}
 .social-links a{
-  width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.06);
-  display:flex;align-items:center;justify-content:center;transition:background 0.15s;
+  width:42px;height:42px;border-radius:50%;background:var(--card);border:1px solid var(--line);
+  display:flex;align-items:center;justify-content:center;transition:background 0.15s,border-color 0.15s;
 }
-.social-links a:hover{background:var(--gold);}
+.social-links a:hover{background:var(--gold);border-color:var(--gold);}
 .social-links a:hover svg{stroke:var(--charcoal);fill:var(--charcoal);}
-.social-links svg{width:17px;height:17px;stroke:#C9C6BE;fill:#C9C6BE;transition:stroke 0.15s,fill 0.15s;}
+.social-links svg{width:20px;height:20px;stroke:var(--charcoal);fill:var(--charcoal);transition:stroke 0.15s,fill 0.15s;}
+
+/* Dark-background footer context (e.g. index.html if footer sits on charcoal) */
+footer.dark .social-links a{background:rgba(255,255,255,0.08);border-color:rgba(255,255,255,0.15);}
+footer.dark .social-links svg{stroke:#C9C6BE;fill:#C9C6BE;}
